@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 
 const FUNDING_TARGET = 20;
 const BASE_TAX_RATE = 20;
@@ -173,7 +173,7 @@ function App() {
   const isBalanced = stats.taxRevenue + stats.cutTotal >= FUNDING_TARGET;
   const headline = getHeadline(taxRate, stats.taxRevenue, stats.cutTotal, stats.productivity);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.scrollTo({ left: 0, top: 0 });
   }, [hasStarted, isDelivered]);
 
@@ -253,7 +253,7 @@ function App() {
           animate={{ opacity: 1, scale: 1 }}
         >
           <p className="mega-chip">mission complete</p>
-          <h1 className="pixel-title mt-3 font-mono text-3xl font-black uppercase text-lime-200 sm:text-5xl">
+          <h1 className="pixel-title mt-3 pt-2 font-mono text-3xl font-black uppercase leading-tight text-lime-200 sm:text-5xl">
             {headline}
           </h1>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
