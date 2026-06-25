@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const FUNDING_TARGET = 20;
 const BASE_TAX_RATE = 20;
@@ -172,6 +172,10 @@ function App() {
 
   const isBalanced = stats.taxRevenue + stats.cutTotal >= FUNDING_TARGET;
   const headline = getHeadline(taxRate, stats.taxRevenue, stats.cutTotal, stats.productivity);
+
+  useEffect(() => {
+    window.scrollTo({ left: 0, top: 0 });
+  }, [hasStarted, isDelivered]);
 
   const resetGame = () => {
     setCutSelections({});
