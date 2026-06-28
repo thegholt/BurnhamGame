@@ -10,7 +10,7 @@ type SpendingCommitment = {
   icon: string;
 };
 
-type DepartmentCut = {
+type Department = {
   id: string;
   name: string;
   saving: number;
@@ -20,17 +20,11 @@ type DepartmentCut = {
   priority?: boolean;
 };
 
-type TaxMeasure = {
-  id: string;
-  name: string;
-  revenue: number;
-  productivityImpact: number;
-  taxBurdenImpact: number;
-  consequence: string;
-  icon: string;
-};
+type DepartmentCuts = Record<string, number>;
 
-type SelectionMap = Record<string, boolean>;
+const MAX_TAX_REVENUE = 45;
+const MAX_TAX_PRODUCTIVITY_HIT = 45;
+const MAX_TAX_BURDEN = 95;
 
 const spendingCommitments: SpendingCommitment[] = [
   {
@@ -105,7 +99,7 @@ const spendingCommitments: SpendingCommitment[] = [
   },
 ];
 
-const departmentCuts: DepartmentCut[] = [
+const departments: Department[] = [
   {
     id: "defence",
     name: "Defence",
@@ -134,14 +128,6 @@ const departmentCuts: DepartmentCut[] = [
     priority: true,
   },
   {
-    id: "prisons",
-    name: "Prisons",
-    saving: 4,
-    productivityImpact: -1,
-    consequence: "Prison overcrowding worsens.",
-    icon: "PRS",
-  },
-  {
     id: "roads",
     name: "Roads",
     saving: 5,
@@ -151,14 +137,6 @@ const departmentCuts: DepartmentCut[] = [
     priority: true,
   },
   {
-    id: "transport",
-    name: "Transport",
-    saving: 6,
-    productivityImpact: -3,
-    consequence: "Infrastructure projects delayed.",
-    icon: "TRN",
-  },
-  {
     id: "local-government",
     name: "Local Government",
     saving: 6,
@@ -166,6 +144,14 @@ const departmentCuts: DepartmentCut[] = [
     consequence: "Councils cut local services.",
     icon: "LOC",
     priority: true,
+  },
+  {
+    id: "transport",
+    name: "Transport",
+    saving: 6,
+    productivityImpact: -3,
+    consequence: "Infrastructure projects delayed.",
+    icon: "TRN",
   },
   {
     id: "science",
@@ -184,22 +170,6 @@ const departmentCuts: DepartmentCut[] = [
     icon: "BIZ",
   },
   {
-    id: "floods",
-    name: "Flood Defences",
-    saving: 4,
-    productivityImpact: -1,
-    consequence: "Flood resilience weakened.",
-    icon: "FLD",
-  },
-  {
-    id: "farming",
-    name: "Farming",
-    saving: 3,
-    productivityImpact: -1,
-    consequence: "Rural support reduced.",
-    icon: "FRM",
-  },
-  {
     id: "foreign-aid",
     name: "Foreign Aid",
     saving: 8,
@@ -208,113 +178,12 @@ const departmentCuts: DepartmentCut[] = [
     icon: "AID",
   },
   {
-    id: "culture",
-    name: "Culture",
-    saving: 3,
-    productivityImpact: 0,
-    consequence: "Arts and heritage budgets cut.",
-    icon: "ART",
-  },
-  {
     id: "civil-service",
     name: "Civil Service",
     saving: 6,
     productivityImpact: 1,
     consequence: "Whitehall efficiency savings claimed.",
     icon: "CS",
-  },
-];
-
-const taxMeasures: TaxMeasure[] = [
-  {
-    id: "income-tax",
-    name: "Raise Income Tax",
-    revenue: 12,
-    productivityImpact: -8,
-    taxBurdenImpact: 18,
-    consequence: "Working people pay more.",
-    icon: "PAYE",
-  },
-  {
-    id: "national-insurance",
-    name: "Raise National Insurance",
-    revenue: 10,
-    productivityImpact: -9,
-    taxBurdenImpact: 16,
-    consequence: "Jobs and wages squeezed.",
-    icon: "NI",
-  },
-  {
-    id: "vat",
-    name: "Raise VAT",
-    revenue: 14,
-    productivityImpact: -7,
-    taxBurdenImpact: 22,
-    consequence: "Everyday shopping costs more.",
-    icon: "VAT",
-  },
-  {
-    id: "wealth-tax",
-    name: "Wealth Tax",
-    revenue: 8,
-    productivityImpact: -6,
-    taxBurdenImpact: 4,
-    consequence: "Investment confidence falls.",
-    icon: "WLT",
-  },
-  {
-    id: "corporation-tax",
-    name: "Corporation Tax Rise",
-    revenue: 12,
-    productivityImpact: -10,
-    taxBurdenImpact: 8,
-    consequence: "Business investment slows.",
-    icon: "CORP",
-  },
-  {
-    id: "capital-gains",
-    name: "Capital Gains Tax Rise",
-    revenue: 6,
-    productivityImpact: -5,
-    taxBurdenImpact: 3,
-    consequence: "Investment incentives weaken.",
-    icon: "CGT",
-  },
-  {
-    id: "dividend-tax",
-    name: "Dividend Tax Rise",
-    revenue: 4,
-    productivityImpact: -3,
-    taxBurdenImpact: 2,
-    consequence: "Savers and investors hit.",
-    icon: "DIV",
-  },
-  {
-    id: "fuel-duty",
-    name: "Fuel Duty Rise",
-    revenue: 5,
-    productivityImpact: -4,
-    taxBurdenImpact: 8,
-    consequence: "Drivers pay more.",
-    icon: "FUEL",
-  },
-  {
-    id: "stamp-duty",
-    name: "Stamp Duty Rise",
-    revenue: 4,
-    productivityImpact: -3,
-    taxBurdenImpact: 3,
-    consequence: "Housing market slows.",
-    icon: "SDLT",
-  },
-  {
-    id: "windfall-tax",
-    name: "Windfall Tax",
-    revenue: 6,
-    productivityImpact: -3,
-    taxBurdenImpact: 1,
-    consequence: "One-off raid on industry.",
-    icon: "WND",
   },
 ];
 
@@ -336,6 +205,18 @@ function formatMoney(value: number) {
 
 function getRandomCommitment() {
   return spendingCommitments[Math.floor(Math.random() * spendingCommitments.length)];
+}
+
+function calculateTaxRevenue(taxSlider: number) {
+  return Number((Math.pow(taxSlider / 100, 1.18) * MAX_TAX_REVENUE).toFixed(1));
+}
+
+function calculateTaxProductivityHit(taxSlider: number) {
+  return Math.round(Math.pow(taxSlider / 100, 1.35) * MAX_TAX_PRODUCTIVITY_HIT);
+}
+
+function calculateTaxBurden(taxSlider: number) {
+  return Math.round(Math.pow(taxSlider / 100, 1.12) * MAX_TAX_BURDEN);
 }
 
 function getTaxBurdenLabel(taxBurden: number) {
@@ -374,19 +255,24 @@ function getRating(score: number) {
   return "Fiscal Meltdown";
 }
 
-function getHeadline(
-  commitment: SpendingCommitment,
-  selectedCuts: DepartmentCut[],
-  selectedTaxes: TaxMeasure[],
-  productivity: number,
-  taxBurden: number,
-) {
-  const cutIds = new Set(selectedCuts.map((cut) => cut.id));
-  const cutTotal = selectedCuts.reduce((total, cut) => total + cut.saving, 0);
-  const taxTotal = selectedTaxes.reduce((total, tax) => total + tax.revenue, 0);
+function getHeadline({
+  commitment,
+  departmentCuts,
+  productivity,
+  taxBurden,
+  taxRevenue,
+}: {
+  commitment: SpendingCommitment;
+  departmentCuts: Array<{ department: Department; amount: number }>;
+  productivity: number;
+  taxBurden: number;
+  taxRevenue: number;
+}) {
+  const cutIds = new Set(departmentCuts.map(({ department }) => department.id));
+  const cutTotal = departmentCuts.reduce((total, cut) => total + cut.amount, 0);
 
   if (productivity < 55) {
-    return "Productivity Falls as Tax Rises Hit Economy";
+    return "Productivity Falls as Budget Choices Hit Economy";
   }
 
   if (taxBurden >= 41) {
@@ -401,7 +287,7 @@ function getHeadline(
     return "Police and Justice Cut to Fund New Spending Plan";
   }
 
-  if (taxTotal > cutTotal) {
+  if (taxRevenue > cutTotal) {
     return `Prime Minister Raises Taxes to Pay for ${commitment.title}`;
   }
 
@@ -438,28 +324,31 @@ function App() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isDelivered, setIsDelivered] = useState(false);
   const [commitment, setCommitment] = useState(getRandomCommitment);
-  const [cutSelections, setCutSelections] = useState<SelectionMap>({});
-  const [taxSelections, setTaxSelections] = useState<SelectionMap>({});
+  const [departmentCuts, setDepartmentCuts] = useState<DepartmentCuts>({});
+  const [taxSlider, setTaxSlider] = useState(0);
 
   const stats = useMemo(() => {
-    const selectedCuts = departmentCuts.filter((cut) => cutSelections[cut.id]);
-    const selectedTaxes = taxMeasures.filter((tax) => taxSelections[tax.id]);
-    const cutTotal = selectedCuts.reduce((total, cut) => total + cut.saving, 0);
-    const taxTotal = selectedTaxes.reduce((total, tax) => total + tax.revenue, 0);
-    const productivityImpact =
-      selectedCuts.reduce((total, cut) => total + cut.productivityImpact, 0) +
-      selectedTaxes.reduce((total, tax) => total + tax.productivityImpact, 0);
-    const productivity = Math.round(clamp(100 + productivityImpact, 0, 100));
-    const taxBurden = Math.round(
-      clamp(
-        selectedTaxes.reduce((total, tax) => total + tax.taxBurdenImpact, 0),
-        0,
-        100,
-      ),
+    const selectedDepartmentCuts = departments
+      .map((department) => ({
+        amount: departmentCuts[department.id] ?? 0,
+        department,
+      }))
+      .filter(({ amount }) => amount > 0);
+    const cutTotal = selectedDepartmentCuts.reduce((total, cut) => total + cut.amount, 0);
+    const departmentProductivityImpact = selectedDepartmentCuts.reduce(
+      (total, { amount, department }) => total + department.productivityImpact * (amount / department.saving),
+      0,
     );
-    const priorityCutPenalty = selectedCuts.reduce((total, cut) => total + (servicePenalty[cut.id] ?? 0), 0);
+    const taxRevenue = calculateTaxRevenue(taxSlider);
+    const taxProductivityHit = calculateTaxProductivityHit(taxSlider);
+    const taxBurden = calculateTaxBurden(taxSlider);
+    const fundingFound = Number((cutTotal + taxRevenue).toFixed(1));
+    const productivity = Math.round(clamp(100 + departmentProductivityImpact - taxProductivityHit, 0, 100));
+    const priorityCutPenalty = selectedDepartmentCuts.reduce(
+      (total, { amount, department }) => total + (servicePenalty[department.id] ?? 0) * (amount / department.saving),
+      0,
+    );
     const score = Math.round(clamp(100 - taxBurden - (100 - productivity) - priorityCutPenalty, 0, 100));
-    const fundingFound = cutTotal + taxTotal;
 
     return {
       cutTotal,
@@ -467,15 +356,21 @@ function App() {
       priorityCutPenalty,
       productivity,
       score,
-      selectedCuts,
-      selectedTaxes,
+      selectedDepartmentCuts,
       taxBurden,
-      taxTotal,
+      taxRevenue,
+      taxSlider,
     };
-  }, [cutSelections, taxSelections]);
+  }, [departmentCuts, taxSlider]);
 
   const isBalanced = stats.fundingFound >= commitment.cost;
-  const headline = getHeadline(commitment, stats.selectedCuts, stats.selectedTaxes, stats.productivity, stats.taxBurden);
+  const headline = getHeadline({
+    commitment,
+    departmentCuts: stats.selectedDepartmentCuts,
+    productivity: stats.productivity,
+    taxBurden: stats.taxBurden,
+    taxRevenue: stats.taxRevenue,
+  });
   const rating = getRating(stats.score);
 
   useLayoutEffect(() => {
@@ -484,23 +379,16 @@ function App() {
 
   const resetGame = () => {
     setCommitment(getRandomCommitment());
-    setCutSelections({});
-    setTaxSelections({});
+    setDepartmentCuts({});
+    setTaxSlider(0);
     setHasStarted(false);
     setIsDelivered(false);
   };
 
-  const toggleCut = (departmentId: string) => {
-    setCutSelections((current) => ({
+  const setDepartmentCut = (departmentId: string, amount: number) => {
+    setDepartmentCuts((current) => ({
       ...current,
-      [departmentId]: !current[departmentId],
-    }));
-  };
-
-  const toggleTax = (taxId: string) => {
-    setTaxSelections((current) => ({
-      ...current,
-      [taxId]: !current[taxId],
+      [departmentId]: amount,
     }));
   };
 
@@ -523,14 +411,14 @@ function App() {
   return (
     <GameScreen
       commitment={commitment}
+      departmentCuts={departmentCuts}
       isBalanced={isBalanced}
       stats={stats}
-      cutSelections={cutSelections}
-      taxSelections={taxSelections}
+      taxSlider={taxSlider}
       onDeliver={() => setIsDelivered(true)}
       onReset={resetGame}
-      onToggleCut={toggleCut}
-      onToggleTax={toggleTax}
+      onSetDepartmentCut={setDepartmentCut}
+      onSetTaxSlider={setTaxSlider}
     />
   );
 }
@@ -563,11 +451,7 @@ function OpeningScreen({
               <p>Unfortunately, the Treasury says there is no spare money.</p>
               <p>You must now find the money.</p>
             </div>
-            <div className="summary-card p-4">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan-100">Next promise</p>
-              <p className="mt-2 font-mono text-2xl font-black uppercase text-yellow-100">{commitment.title}</p>
-              <p className="mt-1 text-sm text-lime-100">Estimated cost: {formatMoney(commitment.cost)}</p>
-            </div>
+            <CommitmentMiniCard commitment={commitment} />
             <PixelButton onClick={onStart} tone="yellow">
               Find the Money
             </PixelButton>
@@ -581,33 +465,34 @@ function OpeningScreen({
 
 function GameScreen({
   commitment,
-  cutSelections,
+  departmentCuts,
   isBalanced,
   onDeliver,
   onReset,
-  onToggleCut,
-  onToggleTax,
+  onSetDepartmentCut,
+  onSetTaxSlider,
   stats,
-  taxSelections,
+  taxSlider,
 }: {
   commitment: SpendingCommitment;
-  cutSelections: SelectionMap;
+  departmentCuts: DepartmentCuts;
   isBalanced: boolean;
   onDeliver: () => void;
   onReset: () => void;
-  onToggleCut: (departmentId: string) => void;
-  onToggleTax: (taxId: string) => void;
+  onSetDepartmentCut: (departmentId: string, amount: number) => void;
+  onSetTaxSlider: (amount: number) => void;
   stats: {
+    cutTotal: number;
     fundingFound: number;
     productivity: number;
-    selectedCuts: DepartmentCut[];
-    selectedTaxes: TaxMeasure[];
+    selectedDepartmentCuts: Array<{ department: Department; amount: number }>;
     taxBurden: number;
+    taxRevenue: number;
   };
-  taxSelections: SelectionMap;
+  taxSlider: number;
 }) {
   return (
-    <main className="retro-screen min-h-screen pb-40 text-white">
+    <main className="retro-screen min-h-screen pb-36 text-white">
       <header className="sticky top-0 z-10 border-b-4 border-fuchsia-500 bg-[#080014]/95 px-4 py-4 shadow-[0_6px_0_#020617]">
         <div className="mx-auto grid max-w-6xl gap-3 sm:grid-cols-3">
           <MetricBar
@@ -626,55 +511,56 @@ function GameScreen({
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 lg:grid-cols-[0.85fr_1.45fr_0.95fr]">
+      <section className="mx-auto grid max-w-6xl gap-5 px-4 py-6 lg:grid-cols-[0.95fr_1.55fr]">
         <aside className="space-y-5">
-          <SpendingCommitmentCard commitment={commitment} />
+          <section className="pixel-panel p-4">
+            <p className="mega-chip">spending promise</p>
+            <h1 className="pixel-title mt-4 font-mono text-3xl font-black uppercase text-yellow-100">{commitment.title}</h1>
+            <p className="mt-2 font-mono text-lime-100">{commitment.description}</p>
+            <div className="mt-4 border-4 border-slate-950 bg-yellow-200 p-4 font-mono text-slate-950 shadow-[6px_6px_0_#020617]">
+              <p className="text-sm font-black uppercase">Target</p>
+              <p className="text-4xl font-black">{formatMoney(commitment.cost)}</p>
+            </div>
+          </section>
+          <TaxSliderPanel
+            taxBurden={stats.taxBurden}
+            taxRevenue={stats.taxRevenue}
+            taxSlider={taxSlider}
+            onChange={onSetTaxSlider}
+          />
           <CharacterPanel mood={stats.taxBurden >= 70 ? "panic" : stats.productivity < 50 ? "worried" : "ready"} />
-          <DecisionLog selectedCuts={stats.selectedCuts} selectedTaxes={stats.selectedTaxes} />
         </aside>
 
-        <section className="space-y-4">
-          <div className="pixel-panel p-4">
-            <p className="mega-chip">department cuts</p>
-            <h2 className="pixel-title mt-3 font-mono text-2xl font-black uppercase text-yellow-200">
-              Cut core services to fund the pledge
-            </h2>
+        <section className="pixel-panel p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="mega-chip">department sliders</p>
+              <h2 className="pixel-title mt-3 font-mono text-2xl font-black uppercase text-yellow-200">
+                Slide cuts up or down
+              </h2>
+            </div>
+            <div className="font-mono text-sm uppercase text-cyan-100">
+              Cuts: <strong className="text-yellow-100">{formatMoney(stats.cutTotal)}</strong>
+            </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {departmentCuts.map((department) => (
-              <DepartmentCutCard
+
+          <div className="mt-5 grid gap-3">
+            {departments.map((department) => (
+              <DepartmentSlider
+                amount={departmentCuts[department.id] ?? 0}
                 department={department}
-                isSelected={Boolean(cutSelections[department.id])}
                 key={department.id}
-                onToggle={() => onToggleCut(department.id)}
+                onChange={(amount) => onSetDepartmentCut(department.id, amount)}
               />
             ))}
           </div>
         </section>
-
-        <aside className="space-y-4">
-          <div className="pixel-panel p-4">
-            <p className="mega-chip">raise taxes</p>
-            <h2 className="pixel-title mt-3 font-mono text-2xl font-black uppercase text-yellow-200">Make taxpayers pay</h2>
-            <p className="mt-3 font-mono text-sm text-lime-100">Each tax can be selected once. Burden hits working people hardest.</p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {taxMeasures.map((tax) => (
-              <TaxMeasureCard
-                isSelected={Boolean(taxSelections[tax.id])}
-                key={tax.id}
-                onToggle={() => onToggleTax(tax.id)}
-                tax={tax}
-              />
-            ))}
-          </div>
-        </aside>
       </section>
 
       <footer className="fixed inset-x-0 bottom-0 z-20 border-t-4 border-cyan-300 bg-[#080014]/95 px-4 py-4 shadow-[0_-8px_0_#020617]">
         <div className="mx-auto grid max-w-6xl gap-3 sm:grid-cols-[1fr_auto_auto] sm:items-center">
           <p className="font-mono text-sm uppercase tracking-[0.16em] text-cyan-100">
-            {isBalanced ? "Funding found. The Treasury report is ready." : "Find enough money to unlock the budget."}
+            {isBalanced ? "Funding found. The Treasury report is ready." : "Use the sliders until the promise is paid for."}
           </p>
           <PixelButton onClick={onReset} tone="blue">
             Reset
@@ -712,10 +598,10 @@ function EndScreen({
     fundingFound: number;
     productivity: number;
     score: number;
-    selectedCuts: DepartmentCut[];
-    selectedTaxes: TaxMeasure[];
+    selectedDepartmentCuts: Array<{ department: Department; amount: number }>;
     taxBurden: number;
-    taxTotal: number;
+    taxRevenue: number;
+    taxSlider: number;
   };
 }) {
   return (
@@ -737,27 +623,23 @@ function EndScreen({
           </div>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <SummaryCard label="Spending Commitment" value={commitment.title} />
           <SummaryCard label="Cost" value={formatMoney(commitment.cost)} />
           <SummaryCard label="Funding Found" value={formatMoney(stats.fundingFound)} />
+          <SummaryCard label="Tax Slider" value={`${stats.taxSlider}%`} />
           <SummaryCard label="Productivity" value={`${stats.productivity}%`} />
           <SummaryCard label="Tax Burden" value={`${stats.taxBurden}% ${getTaxBurdenLabel(stats.taxBurden)}`} />
+          <SummaryCard label="Department Cuts" value={formatMoney(stats.cutTotal)} />
+          <SummaryCard label="Tax Revenue" value={formatMoney(stats.taxRevenue)} />
           <SummaryCard label="Treasury Rating" value={rating} />
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <ReportList
-            emptyText="No departments cut."
-            items={stats.selectedCuts.map((cut) => `${cut.name} cut by ${formatMoney(cut.saving)}`)}
-            title="Cuts Made"
-          />
-          <ReportList
-            emptyText="No tax rises selected."
-            items={stats.selectedTaxes.map((tax) => tax.name)}
-            title="Taxes Raised"
-          />
-        </div>
+        <ReportList
+          emptyText="No departments cut."
+          items={stats.selectedDepartmentCuts.map(({ amount, department }) => `${department.name}: ${formatMoney(amount)} cut`)}
+          title="Slider Choices"
+        />
 
         <div className="score-card mt-6 p-5 text-center">
           <p className="font-mono text-sm uppercase tracking-[0.25em] text-cyan-100">Final score</p>
@@ -785,124 +667,103 @@ function EndScreen({
   );
 }
 
-function SpendingCommitmentCard({ commitment }: { commitment: SpendingCommitment }) {
+function CommitmentMiniCard({ commitment }: { commitment: SpendingCommitment }) {
   return (
-    <section className="pixel-panel p-4">
-      <p className="mega-chip">spending promise</p>
-      <div className="mt-4 flex items-start gap-3">
-        <span className="border-4 border-slate-950 bg-yellow-200 px-3 py-2 font-mono font-black text-slate-950 shadow-[4px_4px_0_#020617]">
-          {commitment.icon}
-        </span>
-        <div>
-          <h1 className="font-mono text-2xl font-black uppercase text-yellow-100">{commitment.title}</h1>
-          <p className="mt-2 font-mono text-sm text-lime-100">{commitment.description}</p>
-        </div>
-      </div>
-      <div className="crt-copy mt-4 p-4 font-mono text-lime-100">
-        <p>Prime Minister, your new {commitment.title} will cost {formatMoney(commitment.cost)}.</p>
-        <p className="mt-2 text-yellow-100">Every promise has a price.</p>
-      </div>
-    </section>
+    <div className="summary-card p-4">
+      <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan-100">Next promise</p>
+      <p className="mt-2 font-mono text-2xl font-black uppercase text-yellow-100">{commitment.title}</p>
+      <p className="mt-1 text-sm text-lime-100">Estimated cost: {formatMoney(commitment.cost)}</p>
+    </div>
   );
 }
 
-function DepartmentCutCard({
-  department,
-  isSelected,
-  onToggle,
+function TaxSliderPanel({
+  onChange,
+  taxBurden,
+  taxRevenue,
+  taxSlider,
 }: {
-  department: DepartmentCut;
-  isSelected: boolean;
-  onToggle: () => void;
+  onChange: (value: number) => void;
+  taxBurden: number;
+  taxRevenue: number;
+  taxSlider: number;
 }) {
   return (
-    <motion.article className={`department-card p-4 ${department.priority ? "priority-card" : ""}`} layout>
+    <section className="slider-panel p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan-200">{department.icon}</p>
-          <h3 className="mt-1 text-xl font-black text-white">{department.name}</h3>
-        </div>
-        <p className="border-2 border-slate-950 bg-yellow-200 px-3 py-2 font-mono font-black text-slate-950 shadow-[4px_4px_0_#020617]">
-          Save {formatMoney(department.saving)}
-        </p>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-xs uppercase text-cyan-100">
-        <p>Productivity</p>
-        <p className="text-right text-orange-200">{department.productivityImpact > 0 ? "+" : ""}{department.productivityImpact}%</p>
-      </div>
-      <p className="mt-3 min-h-12 border-2 border-cyan-900 bg-black/50 p-3 font-mono text-sm text-lime-100">
-        {department.consequence}
-      </p>
-      <button
-        className={`cut-button mt-4 w-full px-3 py-3 font-mono text-sm font-black uppercase ${
-          isSelected ? "cut-button--selected" : ""
-        }`}
-        onClick={onToggle}
-      >
-        {isSelected ? "Undo Cut" : `Cut ${department.name}`}
-      </button>
-    </motion.article>
-  );
-}
-
-function TaxMeasureCard({
-  isSelected,
-  onToggle,
-  tax,
-}: {
-  isSelected: boolean;
-  onToggle: () => void;
-  tax: TaxMeasure;
-}) {
-  return (
-    <motion.article className="tax-card p-4" layout>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan-200">{tax.icon}</p>
-          <h3 className="mt-1 font-mono text-lg font-black uppercase text-white">{tax.name}</h3>
+          <p className="mega-chip">tax slider</p>
+          <h2 className="mt-3 font-mono text-2xl font-black uppercase text-yellow-100">Raise taxes</h2>
         </div>
         <p className="border-2 border-slate-950 bg-lime-200 px-3 py-2 font-mono font-black text-slate-950 shadow-[4px_4px_0_#020617]">
-          +{formatMoney(tax.revenue)}
+          {formatMoney(taxRevenue)}
         </p>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-xs uppercase text-cyan-100">
-        <p>Productivity</p>
-        <p className="text-right text-orange-200">{tax.productivityImpact}%</p>
-        <p>Tax Burden</p>
-        <p className="text-right text-red-200">+{tax.taxBurdenImpact}%</p>
+      <input
+        aria-label="Tax rises"
+        className="tax-slider mt-5 w-full"
+        max={100}
+        min={0}
+        onChange={(event) => onChange(Number(event.target.value))}
+        step={1}
+        type="range"
+        value={taxSlider}
+      />
+      <div className="mt-3 flex justify-between font-mono text-xs uppercase text-cyan-100">
+        <span>0%</span>
+        <span>Tax pressure {taxSlider}%</span>
+        <span>100%</span>
       </div>
-      <p className="mt-3 border-2 border-cyan-900 bg-black/50 p-3 font-mono text-sm text-lime-100">{tax.consequence}</p>
-      <button
-        className={`cut-button mt-4 w-full px-3 py-3 font-mono text-sm font-black uppercase ${
-          isSelected ? "cut-button--selected" : ""
-        }`}
-        onClick={onToggle}
-      >
-        {isSelected ? "Cancel Tax" : tax.name}
-      </button>
-    </motion.article>
+      <div className="mt-4 grid grid-cols-2 gap-3 font-mono text-sm uppercase">
+        <p className="text-cyan-100">Tax Burden</p>
+        <p className="text-right text-red-200">{taxBurden}% {getTaxBurdenLabel(taxBurden)}</p>
+      </div>
+    </section>
   );
 }
 
-function DecisionLog({
-  selectedCuts,
-  selectedTaxes,
+function DepartmentSlider({
+  amount,
+  department,
+  onChange,
 }: {
-  selectedCuts: DepartmentCut[];
-  selectedTaxes: TaxMeasure[];
+  amount: number;
+  department: Department;
+  onChange: (amount: number) => void;
 }) {
-  const decisions = [
-    ...selectedCuts.map((cut) => `Cut ${cut.name}: ${formatMoney(cut.saving)}`),
-    ...selectedTaxes.map((tax) => `${tax.name}: ${formatMoney(tax.revenue)}`),
-  ];
+  const productivityImpact = department.saving === 0 ? 0 : department.productivityImpact * (amount / department.saving);
 
   return (
-    <section className="pixel-panel p-4">
-      <p className="mega-chip">decision log</p>
-      <ul className="mt-4 space-y-2 font-mono text-sm text-lime-100">
-        {decisions.length > 0 ? decisions.map((decision) => <li key={decision}>- {decision}</li>) : <li>- No savings chosen yet.</li>}
-      </ul>
-    </section>
+    <article className={`slider-row ${department.priority ? "priority-card" : ""}`}>
+      <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-start">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="border-2 border-slate-950 bg-yellow-200 px-2 py-1 font-mono text-xs font-black text-slate-950 shadow-[3px_3px_0_#020617]">
+              {department.icon}
+            </span>
+            <h3 className="font-mono text-lg font-black uppercase text-white">{department.name}</h3>
+            {department.priority ? <span className="font-mono text-xs uppercase text-orange-200">Core service</span> : null}
+          </div>
+          <p className="mt-2 font-mono text-sm text-lime-100">{amount > 0 ? department.consequence : "No cut selected."}</p>
+        </div>
+        <p className="font-mono text-xl font-black text-yellow-100">{formatMoney(amount)}</p>
+      </div>
+      <input
+        aria-label={`${department.name} cut`}
+        className="tax-slider mt-4 w-full"
+        max={department.saving}
+        min={0}
+        onChange={(event) => onChange(Number(event.target.value))}
+        step={1}
+        type="range"
+        value={amount}
+      />
+      <div className="mt-2 flex justify-between font-mono text-xs uppercase text-cyan-100">
+        <span>£0bn</span>
+        <span>Productivity {productivityImpact >= 0 ? "+" : ""}{productivityImpact.toFixed(1)}%</span>
+        <span>{formatMoney(department.saving)}</span>
+      </div>
+    </article>
   );
 }
 
@@ -989,7 +850,7 @@ function PixelButton({
 
 function ReportList({ emptyText, items, title }: { emptyText: string; items: string[]; title: string }) {
   return (
-    <section className="summary-card p-5">
+    <section className="summary-card mt-6 p-5">
       <p className="font-mono text-sm uppercase text-cyan-100">{title}</p>
       <ul className="mt-3 space-y-2 font-mono text-sm text-lime-100">
         {items.length > 0 ? items.map((item) => <li key={item}>- {item}</li>) : <li>{emptyText}</li>}
@@ -1002,7 +863,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="summary-card p-5">
       <p className="font-mono text-sm uppercase text-cyan-100">{label}</p>
-      <p className="mt-2 font-mono text-2xl font-black text-yellow-100 sm:text-3xl">{value}</p>
+      <p className="mt-2 font-mono text-2xl font-black text-yellow-100">{value}</p>
     </div>
   );
 }

@@ -25,6 +25,6 @@ There is exactly one service: the Vite dev server for the React app.
   in `src/index.css`. There is **no** `tailwind.config.js` / `postcss.config.js`; theme tokens
   live in the `@theme { ... }` block of `src/index.css`.
 - The game flow lives entirely in `src/App.tsx`: opening briefing → budget screen (random spending
-  commitment + department cut cards + tax measure cards) → "Deliver Budget" Treasury Report. The
-  "Deliver Budget" button is only enabled once selected tax revenue + selected cuts reach the active
-  commitment cost.
+  commitment + department cut sliders + a consolidated tax slider) → "Deliver Budget" Treasury
+  Report. The "Deliver Budget" button is only enabled once tax revenue + selected cuts reach the
+  active commitment cost.

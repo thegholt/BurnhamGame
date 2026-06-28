@@ -34,7 +34,7 @@ The current app includes the first playable client-side loop from the BRD:
 
 - Opening Treasury briefing
 - Random spending commitment with a clear funding target
-- One-click department cuts with immediate consequences
-- Tax-raising cards, including Wealth Tax
+- Department cut sliders with immediate funding/productivity feedback
+- A consolidated tax slider for tax revenue and Tax Burden
 - Funding, productivity, and Tax Burden HUD meters
 - Treasury Report end screen with score, rating, choices, and headline

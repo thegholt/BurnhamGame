@@ -66,6 +66,8 @@ button:disabled {
 .pixel-panel,
 .department-card,
 .tax-card,
+.slider-panel,
+.slider-row,
 .hud-meter,
 .summary-card {
   border: 4px solid #7dd3fc;
@@ -91,6 +93,15 @@ button:disabled {
   transition:
     transform 160ms ease,
     box-shadow 160ms ease;
+}
+
+.slider-panel {
+  border-color: #fb7185;
+}
+
+.slider-row {
+  border-color: #f0abfc;
+  padding: 1rem;
 }
 
 .priority-card {
