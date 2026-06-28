@@ -760,7 +760,7 @@ function DepartmentSlider({
       />
       <div className="mt-2 flex justify-between font-mono text-xs uppercase text-cyan-100">
         <span>£0bn</span>
-        <span>Productivity {productivityImpact >= 0 ? "+" : ""}{productivityImpact.toFixed(1)}%</span>
+        <span>Cut impact {productivityImpact >= 0 ? "+" : ""}{productivityImpact.toFixed(1)} pts</span>
         <span>{formatMoney(department.saving)}</span>
       </div>
     </article>
