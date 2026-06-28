@@ -33,8 +33,8 @@ npm run preview
 The current app includes the first playable client-side loop from the BRD:
 
 - Opening Treasury briefing
-- £20bn funding target
-- Income tax slider with non-linear revenue/productivity effects
-- Department cut cards with immediate consequences
-- Funding, productivity, and approval HUD meters
-- Deliver Budget end screen with score and headline
+- Random spending commitment with a clear funding target
+- Department cut sliders with immediate funding/productivity feedback
+- A consolidated tax slider for tax revenue and Tax Burden
+- Funding, productivity, and Tax Burden HUD meters
+- Treasury Report end screen with score, rating, choices, and headline
